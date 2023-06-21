@@ -42,15 +42,61 @@ int main(int argc, char *argv[])
 
     int nums[10];
 
-    int *ptr;
+    int *ptr1 = nums;
+    int *ptr2 = &nums;
+    int *ptr3 = &nums[0];
 
-    ptr = nums;
+    // printf("&nums[0]: %zu\n", sizeof(&nums[0]));
+    // printf("nums+0: %zu\n", sizeof(nums + 0));
 
-    int ptrsz = sizeof(ptr);
-    int arrsz = sizeof(nums);
-    int arrsz2 = sizeof(&nums);
+    // // Addresses:
+    // printf("    &nums[0]: %zu\n", &nums[0]);
+    // printf("        nums: %zu\n", nums);
+    // printf("       &nums: %zu\n\n", &nums);
 
-    printf("pointer size: %d\narray name size: %d\narray2 name size:%d\n", ptrsz, arrsz, arrsz2);
+    // printf("&nums[0] + 1: %zu\n", (&nums[0]) + 1);
+    printf("    nums + 1: %zu\n", nums + 1);
+    printf("   &nums + 1: %zu\n\n", (&nums) + 1);
+
+    // printf("    size &nums[0]: %zu\n", sizeof(&nums[0]));
+    printf("        size nums: %zu\n", sizeof(nums));
+    printf("       size &nums: %zu\n\n\n", sizeof(&nums));
+
+    // stored in pointers
+    printf("    ptr1 + 1: %zu\n", ptr1 + 1);
+    printf("    ptr2 + 1: %zu\n\n", (ptr2) + 1);
+
+    printf("        size ptr1: %zu\n", sizeof(ptr1));
+    printf("        size ptr2: %zu\n", sizeof(ptr2));
+    // printf("nums+0: %zu\n", (nums + 0) + 1);
+
+    // next test
+    // printf("    base: %zu\n\n", nums);
+    // printf("   &nums: %zu\n", sizeof(&nums)); //**
+    // printf("&nums + 1: %zu\n", &nums + 1);    //**
+    // printf(" nums + 1: %zu\n", nums + 1);
+
+    // printf("Size:\n");
+    // // array name
+    // printf("    nums: %zu\n", sizeof(nums)); //**
+    // printf("   &nums: %zu\n", sizeof(&nums));
+    // printf("&nums[0]: %zu\n\n", sizeof(&nums[0]));
+
+    // printf("    ptr1 = nums: %zu\n", sizeof(ptr1));
+    // printf("   ptr2 = &nums: %zu\n", sizeof(ptr2));
+    // printf("ptr3 = &nums[0]: %zu\n\n\n", sizeof(ptr3));
+
+    // // addresses
+    // printf("Addresses:\n");
+    // printf("    base: %zu\n", nums);
+
+    // printf("    nums: %zu\n", nums + 1);
+    // printf("   &nums: %zu\n", &nums + 1); //**
+    // printf("&nums[0]: %zu\n\n", &nums[0] + 1);
+
+    // printf("    ptr1 = nums: %zu\n", ptr1 + 1);
+    // printf("   ptr2 = &nums: %zu\n", ptr2 + 1);
+    // printf("ptr3 = &nums[0]: %zu\n", ptr3 + 1);
 
     return 0;
 }
