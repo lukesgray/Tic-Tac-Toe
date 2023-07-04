@@ -4,105 +4,288 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define COMMAND 2
+#define COMMAND 256
 
 // fread(&fh_data, sizeof(fh_data), 1, fh_read);
+// void set_player_names(char *player1, char *player2);
+void play_game(int *player, char **game, char *player1, char *player2);
+void collect_user_input(int *row, int *column, char **game);
+void write_value(int *player, char **game, int row, int column);
+bool is_valid_command(char *user_input);
+void parse_command(int *row, int *column, char *user_input);
+bool is_available(int row, int column, char **game);
+bool is_full(char **board);
+bool is_won(char **board);
+char **create_board();
 
+// Instruction Functions
+void print_board(char **board);
 void commands();
-bool parse_command(char *user_input);
-int enter_value(char *user_input, int player, char **game);
 
 int main(int argc, char *argv[])
 {
-    char **arr;
+    char **board = create_board();
+    int player = 1;
 
-    arr = malloc();
-
-    int rows = 3;
-    int columns = 3;
-
-    printf("You are about to play tic-tack-toe.");
+    printf("You are about to play tic-tack-toe.\n");
     commands();
 
-    // player one prompt
-    printf("Player 1, it's your turn! Enter a command:\n");
+    // gameplay loop
 
-    char *user_input = malloc(COMMAND);
-    fgets(user_input, COMMAND, stdin);
+    char *player1 = malloc(COMMAND);
+    char *player2 = malloc(COMMAND);
 
-    if (parse_command(user_input))
-    {
-        enter_value(user_input, 1, rows[3][3]);
-    }
+    printf("Player 1 enter your name:\n");
+    fgets(player1, COMMAND, stdin);
 
-    // player two prompt
+    printf("Player 2 enter your name:\n");
+    fgets(player2, COMMAND, stdin);
+
+    play_game(&player, board, player1, player2);
+
+    printf("\n");
+    print_board(board);
 
     return 0;
 }
 
-bool parse_command(char *user_input)
+void play_game(int *player, char **game, char *player1, char *player2)
 {
-    char columns[] = "TMB";
-    char rows[] = "LMR";
-    // int counter = 0;
-    // char *input_buffer = malloc(INPUT_SIZE_BUFFER * sizeof(char));
-    // int length = strlen(user_input);
+    int row;
+    int column;
 
-    if (strchr(columns, *user_input) == NULL)
+    print_board(game);
+    printf("%s it's your turn! Enter a command:\n", *player == 1 ? player1 : player2);
+
+    collect_user_input(&row, &column, game);
+
+    write_value(player, game, row, column);
+
+    if (is_won(game))
     {
+        printf("%s you won! Better luck next time player %s", *player == 1 ? player1 : player2, *player == 1 ? player2 : player1);
+    }
+    else if (is_full(game))
+    {
+        printf("Game Ended in a Tie");
+    }
+    else
+    {
+        *player = 1 + (*player % 2);
+        play_game(player, game, player1, player2);
+    }
+}
+
+void collect_user_input(int *row, int *column, char **game)
+{
+    bool is_valid = false;
+
+    while (!is_valid)
+    {
+        char *user_input = malloc(COMMAND);
+        fgets(user_input, COMMAND, stdin);
+
+        if (!is_valid_command(user_input))
+        {
+            free(user_input);
+            continue;
+        }
+
+        parse_command(row, column, user_input);
+
+        free(user_input);
+
+        is_valid = is_available(*row, *column, game);
+    }
+}
+
+void write_value(int *player, char **game, int row, int column)
+{
+    // writes value to board based on player number
+    if (*player == 1)
+    {
+        *(*(game + row) + column) = 'X';
+    }
+    else if (*player == 2)
+    {
+        *(*(game + row) + column) = 'O';
+    }
+}
+
+bool is_valid_command(char *user_input)
+{
+    char rows[] = "TMB";
+    char columns[] = "LMR";
+
+    int i = strlen(user_input);
+
+    if (strlen(user_input) > 3)
+    {
+        printf("your in command is too long. The command must be 2 characters\n");
+        commands();
         return false;
     }
 
-    if (strchr(rows, *(user_input + 1)) == NULL)
+    if (strlen(user_input) < 3)
     {
+        printf("your command is too short. The command must be 2 characters\n");
+        commands();
+        return false;
+    }
+
+    if (strchr(rows, *user_input) == NULL && strchr(columns, *(user_input + 1)) == NULL)
+    {
+        printf("your command is not a valid command\n");
+        commands();
         return false;
     }
 
     return true;
 }
 
-int enter_value(char *user_input, int player, char **game)
+void parse_command(int *row, int *column, char *user_input)
 {
-    int row;
-    int column;
 
-    // Assign proper Row
-    if (strchr(*user_input, "T"))
+    char rows[] = "TMB";
+    char columns[] = "LMR";
+
+    for (int counter = 0; counter < 3; counter++)
     {
-        row = 0;
+        if (*user_input == *(rows + counter))
+        {
+            *row = counter;
+        }
+
+        if (*(user_input + 1) == *(columns + counter))
+        {
+            *column = counter;
+        }
     }
-    if (*strchr(*user_input, "M") == 0)
+}
+
+bool is_available(int row, int column, char **game)
+{
+    if (*(*(game + row) + column) == '\0')
     {
-        row = 1;
+
+        return true;
     }
-    if (strchr(*user_input, "B"))
+    else
     {
-        row = 2;
+        printf("That spot has already been taken.\n");
+        printf("Here are the remaining positions:\n");
+        print_board(game);
+        printf("Try again\n");
+        return false;
+    }
+}
+
+bool is_full(char **board)
+{
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            if (*(*(board + i) + j) == '\0')
+            {
+                return false;
+            }
+        }
     }
 
-    // Assign proper column
-    if (strchr(*user_input, "L"))
+    return true;
+}
+
+char **create_board()
+{
+    // allocate list of pointers to pointers of chars
+    char **board = malloc(sizeof(char *) * 3);
+
+    // allocate list of pointers to chars
+
+    for (int i = 0; i < 3; i++)
     {
-        column = 0;
-    }
-    if (*strchr(*user_input, "M") == 1)
-    {
-        column = 1;
-    }
-    if (strchr(*user_input, "R"))
-    {
-        column = 2;
+        *(board + i) = malloc(sizeof(char) * 3);
+        // sets each value equal to NULL for checking for filled board in main gameplay loop
+        for (int j = 0; j < 3; j++)
+        {
+            // board[i][j] = NULL;
+            *(*(board + i) + j) = '\0';
+        }
     }
 
-    if (player == 1)
+    return board;
+}
+
+void print_board(char **board)
+{
+    // print board:
+    for (int i = 0; i < 3; i++)
     {
-        game[row][column] = "X";
+        for (int j = 0; j < 3; j++)
+        {
+            if (*(*(board + i) + j) == 'X' || *(*(board + i) + j) == 'O')
+            {
+                char final_board = *(*(board + i) + j);
+                printf("%c", final_board);
+            }
+            else
+            {
+                // prints an "A" for "Available"
+                printf("A");
+            }
+        }
+        printf("\n");
+    }
+    printf("\n");
+}
+
+bool is_won(char **board)
+{
+
+    bool is_won = false;
+    // Row win
+
+    for (int row_counter = 0; row_counter < 3; row_counter++)
+    {
+        char *element = *(board + row_counter);
+        if (*element == *(element + 1) && *element == *(element + 2) && *element != '\0')
+        {
+            printf("Row %d has three in a row\n", row_counter + 1);
+            is_won = true;
+        }
     }
 
-    if (player == 2)
+    // Column win
+
+    for (int column_counter = 0; column_counter < 3; column_counter++)
     {
-        game[row][column] = "O";
+        char e1 = *(*board + column_counter);
+        char e2 = *(*(board + 1) + column_counter);
+        char e3 = *(*(board + 2) + column_counter);
+
+        if (e1 == e2 && e1 == e3 && e1 != '\0')
+        {
+            printf("Column %d has three in a row\n", column_counter + 1);
+            is_won = true;
+        }
     }
+
+    // Diagonal win
+
+    if (**board == *(*(board + 1) + 1) && **board == *(*(board + 2) + 2) && **board != '\0')
+    {
+        printf("Left to Right Diagonal has 3 in a row\n");
+        is_won = true;
+    }
+
+    if (*(*(board + 2)) == *(*(board + 1) + 1) && *(*(board + 2)) == *(*(board) + 2) && *(*board + 2) != '\0')
+    {
+        printf("Right to Left Diagonal has 3 in a row\n");
+        is_won = true;
+    }
+
+    return is_won;
 }
 
 void commands()
@@ -112,64 +295,3 @@ void commands()
     printf("ML MM MR\n");
     printf("BL BM BR\n");
 }
-
-// int nums[10];
-
-// int *ptr1 = nums;
-// int *ptr2 = &nums;
-// int *ptr3 = &nums[0];
-
-// printf("&nums[0]: %zu\n", sizeof(&nums[0]));
-// printf(" nums[0]: %zu\n", sizeof(nums[0]));
-
-// printf("&nums[0]: %zu\n", &nums[0] + 1);
-// printf(" nums[0]: %zu\n", nums[0] + 1);
-
-// // Addresses:
-// printf("    &nums[0]: %zu\n", &nums[0]);
-// printf("        nums: %zu\n", nums);
-// printf("       &nums: %zu\n\n", &nums);
-
-// printf("&nums[0] + 1: %zu\n", (&nums[0]) + 1);
-// printf("    nums + 1: %zu\n", nums + 1);
-// printf("   &nums + 1: %zu\n\n", (&nums) + 1);
-
-// printf("    size &nums[0]: %zu\n", sizeof(&nums[0]));
-// printf("        size nums: %zu\n", sizeof(nums));
-// printf("       size &nums: %zu\n\n\n", sizeof(&nums));
-
-// stored in pointers
-// printf("    ptr1 + 1: %zu\n", ptr1 + 1);
-// printf("    ptr2 + 1: %zu\n\n", (ptr2) + 1);
-
-// printf("        size ptr1: %zu\n", sizeof(ptr1));
-// printf("        size ptr2: %zu\n", sizeof(ptr2));
-// printf("nums+0: %zu\n", (nums + 0) + 1);
-
-// next test
-// printf("    base: %zu\n\n", nums);
-// printf("   &nums: %zu\n", sizeof(&nums)); //**
-// printf("&nums + 1: %zu\n", &nums + 1);    //**
-// printf(" nums + 1: %zu\n", nums + 1);
-
-// printf("Size:\n");
-// // array name
-// printf("    nums: %zu\n", sizeof(nums)); //**
-// printf("   &nums: %zu\n", sizeof(&nums));
-// printf("&nums[0]: %zu\n\n", sizeof(&nums[0]));
-
-// printf("    ptr1 = nums: %zu\n", sizeof(ptr1));
-// printf("   ptr2 = &nums: %zu\n", sizeof(ptr2));
-// printf("ptr3 = &nums[0]: %zu\n\n\n", sizeof(ptr3));
-
-// // addresses
-// printf("Addresses:\n");
-// printf("    base: %zu\n", nums);
-
-// printf("    nums: %zu\n", nums + 1);
-// printf("   &nums: %zu\n", &nums + 1); //**
-// printf("&nums[0]: %zu\n\n", &nums[0] + 1);
-
-// printf("    ptr1 = nums: %zu\n", ptr1 + 1);
-// printf("   ptr2 = &nums: %zu\n", ptr2 + 1);
-// printf("ptr3 = &nums[0]: %zu\n", ptr3 + 1);

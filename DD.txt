@@ -1,0 +1,29 @@
+char **create_board()
+    -allocates memory for the game board and initializes each element to '\0'
+    -returns double char pointer to game board
+bool is_full(char **board)
+    -requires double char pointer to created game board
+    -iterates over each element of the game board 2d array checking for the value '\0'
+    -returns false if '\0' is found and returns true if '\0' is NOT found 
+bool is_valid_command(char *user_input)
+    -requires pointer to char array
+    -contains a check for length of 2 and a general catch all for command format
+    -returns false if they fail and true if successful
+
+
+
+parse_command(int *row, int *column, char *user_input);
+    -requires pointers to 2 numbers that represent the row and column of the 2d array
+    -requires pointer to parsed user_input
+    -sets the row and column int values according to parsed user_input
+
+bool is_available(int row, int column, char **game);
+    -requires int values representing specified position on game board
+    -requires double pointer to game board
+    -checks if specified spot on game board is equal to '\0'
+    -returns true if '\0' is found and false if '\0' is NOT found
+
+game winner cases:
+    -Row win: row is all the same
+    -Column win: column is all the same
+    -Diagonal win: 
