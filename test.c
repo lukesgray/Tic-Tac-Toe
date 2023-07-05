@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define COMMAND 256
+#define COMMAND 30
 
 // fread(&fh_data, sizeof(fh_data), 1, fh_read);
 // void set_player_names(char *player1, char *player2);
@@ -24,6 +24,7 @@ void commands();
 
 int main(int argc, char *argv[])
 {
+
     char **board = create_board();
     int player = 1;
 
@@ -36,10 +37,12 @@ int main(int argc, char *argv[])
     char *player2 = malloc(COMMAND);
 
     printf("Player 1 enter your name:\n");
-    fgets(player1, COMMAND, stdin);
+    fgets(player1, COMMAND - 1, stdin);
+    player1[strcspn(player1, "\n")] = 0;
 
     printf("Player 2 enter your name:\n");
-    fgets(player2, COMMAND, stdin);
+    fgets(player2, COMMAND - 1, stdin);
+    player2[strcspn(player2, "\n")] = 0;
 
     play_game(&player, board, player1, player2);
 
@@ -63,7 +66,7 @@ void play_game(int *player, char **game, char *player1, char *player2)
 
     if (is_won(game))
     {
-        printf("%s you won! Better luck next time player %s", *player == 1 ? player1 : player2, *player == 1 ? player2 : player1);
+        printf("%s you won! Better luck next time %s", *player == 1 ? player1 : player2, *player == 1 ? player2 : player1);
     }
     else if (is_full(game))
     {
@@ -227,12 +230,12 @@ void print_board(char **board)
             if (*(*(board + i) + j) == 'X' || *(*(board + i) + j) == 'O')
             {
                 char final_board = *(*(board + i) + j);
-                printf("%c", final_board);
+                printf("| %c |", final_board);
             }
             else
             {
                 // prints an "A" for "Available"
-                printf("A");
+                printf("| - |");
             }
         }
         printf("\n");
