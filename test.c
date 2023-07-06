@@ -8,6 +8,9 @@
 
 // fread(&fh_data, sizeof(fh_data), 1, fh_read);
 // void set_player_names(char *player1, char *player2);
+void set_players(char *player1, char *player2);
+void set_player_markers(char *player1_marker, char *player2_marker);
+bool is_valid_marker(char *marker);
 void play_game(int *player, char **game, char *player1, char *player2);
 void collect_user_input(int *row, int *column, char **game);
 void write_value(int *player, char **game, int row, int column);
@@ -33,16 +36,15 @@ int main(int argc, char *argv[])
 
     // gameplay loop
 
+    // Create player names and markers
     char *player1 = malloc(COMMAND);
+    // char *player1_marker = malloc(COMMAND);
+
     char *player2 = malloc(COMMAND);
+    // char *player2_marker = malloc(COMMAND);
 
-    printf("Player 1 enter your name:\n");
-    fgets(player1, COMMAND - 1, stdin);
-    player1[strcspn(player1, "\n")] = 0;
-
-    printf("Player 2 enter your name:\n");
-    fgets(player2, COMMAND - 1, stdin);
-    player2[strcspn(player2, "\n")] = 0;
+    set_players(player1, player2);
+    // set_player_markers(player1_marker, player2_marker);
 
     play_game(&player, board, player1, player2);
 
@@ -50,6 +52,90 @@ int main(int argc, char *argv[])
     print_board(board);
 
     return 0;
+}
+
+bool is_valid_marker(char *marker)
+{
+
+    if (*marker == '\0')
+    {
+        printf("Marker must contain a value\n");
+        return false;
+    }
+
+    if (strlen(marker) > 1)
+    {
+        printf("Marker is too long. It can only be one digit.\n");
+        return false;
+    }
+
+    if (strlen(marker) < 1)
+    {
+        printf("Marker is too short. It must be at least one digit.\n");
+        return false;
+    }
+
+    if (!isalpha(*marker))
+    {
+        printf("Marker must be an uppercase alphanumeric character\n");
+        return false;
+    }
+
+    if (islower(*marker))
+    {
+        printf("Marker must be uppercase\n");
+        return false;
+    }
+}
+
+void set_player_markers(char *player1_marker, char *player2_marker)
+{
+    bool is_valid = false;
+
+    while (!is_valid)
+    {
+        printf("Player 1 enter your marker:\n");
+        fgets(player1_marker, COMMAND - 1, stdin);
+        player1_marker[strcspn(player1_marker, "\n")] = 0;
+        if (!is_valid_marker(player1_marker))
+        {
+            is_valid = false;
+            free(player1_marker);
+        }
+        else
+        {
+            is_valid = true;
+        }
+    }
+
+    is_valid = false;
+
+    while (!is_valid)
+    {
+        printf("Player 2 enter your marker:\n");
+        fgets(player2_marker, COMMAND - 1, stdin);
+        player2_marker[strcspn(player2_marker, "\n")] = 0;
+        if (!is_valid_marker(player2_marker))
+        {
+            is_valid = false;
+            free(player2_marker);
+        }
+        else
+        {
+            is_valid = true;
+        }
+    }
+}
+
+void set_players(char *player1, char *player2)
+{
+    printf("Player 1 enter your name:\n");
+    fgets(player1, COMMAND - 1, stdin);
+    player1[strcspn(player1, "\n")] = 0;
+
+    printf("Player 2 enter your name:\n");
+    fgets(player2, COMMAND - 1, stdin);
+    player2[strcspn(player2, "\n")] = 0;
 }
 
 void play_game(int *player, char **game, char *player1, char *player2)
@@ -168,7 +254,7 @@ void parse_command(int *row, int *column, char *user_input)
 
 bool is_available(int row, int column, char **game)
 {
-    if (*(*(game + row) + column) == '\0')
+    if (*(*(game + row) + column) == '-')
     {
 
         return true;
@@ -189,7 +275,7 @@ bool is_full(char **board)
     {
         for (int j = 0; j < 3; j++)
         {
-            if (*(*(board + i) + j) == '\0')
+            if (*(*(board + i) + j) == '-')
             {
                 return false;
             }
@@ -213,7 +299,7 @@ char **create_board()
         for (int j = 0; j < 3; j++)
         {
             // board[i][j] = NULL;
-            *(*(board + i) + j) = '\0';
+            *(*(board + i) + j) = '-';
         }
     }
 
@@ -227,16 +313,9 @@ void print_board(char **board)
     {
         for (int j = 0; j < 3; j++)
         {
-            if (*(*(board + i) + j) == 'X' || *(*(board + i) + j) == 'O')
-            {
-                char final_board = *(*(board + i) + j);
-                printf("| %c |", final_board);
-            }
-            else
-            {
-                // prints an "A" for "Available"
-                printf("| - |");
-            }
+
+            char current_board = *(*(board + i) + j);
+            printf("| %c |", current_board);
         }
         printf("\n");
     }
@@ -252,7 +331,7 @@ bool is_won(char **board)
     for (int row_counter = 0; row_counter < 3; row_counter++)
     {
         char *element = *(board + row_counter);
-        if (*element == *(element + 1) && *element == *(element + 2) && *element != '\0')
+        if (*element == *(element + 1) && *element == *(element + 2) && *element != '-')
         {
             printf("Row %d has three in a row\n", row_counter + 1);
             is_won = true;
@@ -267,7 +346,7 @@ bool is_won(char **board)
         char e2 = *(*(board + 1) + column_counter);
         char e3 = *(*(board + 2) + column_counter);
 
-        if (e1 == e2 && e1 == e3 && e1 != '\0')
+        if (e1 == e2 && e1 == e3 && e1 != '-')
         {
             printf("Column %d has three in a row\n", column_counter + 1);
             is_won = true;
@@ -276,13 +355,13 @@ bool is_won(char **board)
 
     // Diagonal win
 
-    if (**board == *(*(board + 1) + 1) && **board == *(*(board + 2) + 2) && **board != '\0')
+    if (**board == *(*(board + 1) + 1) && **board == *(*(board + 2) + 2) && **board != '-')
     {
         printf("Left to Right Diagonal has 3 in a row\n");
         is_won = true;
     }
 
-    if (*(*(board + 2)) == *(*(board + 1) + 1) && *(*(board + 2)) == *(*(board) + 2) && *(*board + 2) != '\0')
+    if (*(*(board + 2)) == *(*(board + 1) + 1) && *(*(board + 2)) == *(*(board) + 2) && *(*board + 2) != '-')
     {
         printf("Right to Left Diagonal has 3 in a row\n");
         is_won = true;
