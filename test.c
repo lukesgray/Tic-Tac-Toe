@@ -36,15 +36,15 @@ int main(int argc, char *argv[])
 
     // gameplay loop
 
-    // Create player names and markers
+    // Create player names
     char *player1 = malloc(COMMAND);
-    // char *player1_marker = malloc(COMMAND);
-
     char *player2 = malloc(COMMAND);
-    // char *player2_marker = malloc(COMMAND);
-
     set_players(player1, player2);
-    // set_player_markers(player1_marker, player2_marker);
+
+    // Create Player Markers
+    char *player1_marker = malloc(COMMAND);
+    char *player2_marker = malloc(COMMAND);
+    set_player_markers(player1_marker, player2_marker);
 
     play_game(&player, board, player1, player2);
 
@@ -100,7 +100,6 @@ void set_player_markers(char *player1_marker, char *player2_marker)
         if (!is_valid_marker(player1_marker))
         {
             is_valid = false;
-            free(player1_marker);
         }
         else
         {
@@ -118,7 +117,6 @@ void set_player_markers(char *player1_marker, char *player2_marker)
         if (!is_valid_marker(player2_marker))
         {
             is_valid = false;
-            free(player2_marker);
         }
         else
         {
@@ -222,7 +220,7 @@ bool is_valid_command(char *user_input)
         return false;
     }
 
-    if (strchr(rows, *user_input) == NULL && strchr(columns, *(user_input + 1)) == NULL)
+    if (strchr(rows, *user_input) == NULL || strchr(columns, *(user_input + 1)) == NULL)
     {
         printf("your command is not a valid command\n");
         commands();
