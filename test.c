@@ -28,7 +28,18 @@ void commands();
 int main(int argc, char *argv[])
 {
 
+    // User Defined Number of Players
+    int *number_of_players;
+    char *user_input = malloc(COMMAND);
+    printf("Please Enter the Number of Players:\n");
+    fgets(user_input, COMMAND - 1, stdin);
+    *number_of_players = atoi(user_input);
+
+    char **players = malloc(sizeof(char *) * *number_of_players);
+
+    // Allocate Memory for "Global" Variables and assign to pointers.
     char **board = create_board();
+
     int player = 1;
 
     printf("You are about to play tic-tack-toe.\n");
@@ -50,6 +61,8 @@ int main(int argc, char *argv[])
 
     printf("\n");
     print_board(board);
+
+    free(board);
 
     return 0;
 }
@@ -208,7 +221,7 @@ bool is_valid_command(char *user_input)
 
     if (strlen(user_input) > 3)
     {
-        printf("your in command is too long. The command must be 2 characters\n");
+        printf("your command is too long. The command must be 2 characters\n");
         commands();
         return false;
     }
