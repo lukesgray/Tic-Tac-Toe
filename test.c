@@ -8,7 +8,7 @@
 
 // fread(&fh_data, sizeof(fh_data), 1, fh_read);
 // void set_player_names(char *player1, char *player2);
-void set_players(char **players);
+char **set_players();
 void set_player_markers(char *player1_marker, char *player2_marker);
 bool is_valid_marker(char *marker);
 void play_game(int *player, char **game, char *player1, char *player2);
@@ -28,16 +28,6 @@ void commands();
 int main(int argc, char *argv[])
 {
 
-    // User Defined Number of Players
-    int *number_of_players = malloc(sizeof(int));
-    char *user_input = malloc(COMMAND);
-    printf("Please Enter the Number of Players:\n");
-    fgets(user_input, COMMAND - 1, stdin);
-    *number_of_players = atoi(user_input);
-
-    // allocate space for player array
-    char **players = malloc(sizeof(char *) * *number_of_players);
-
     // Allocate Memory for "Global" Variables and assign to pointers.
     char **board = create_board();
 
@@ -48,25 +38,16 @@ int main(int argc, char *argv[])
 
     // gameplay loop
 
-    // Create player names
-    for (int counter = 0; counter < *number_of_players; counter++)
-    {
-        // printf("number of players: %d\n", *number_of_players);
-        // printf("counter: %d\n", counter);
-        *(players + counter) = malloc(COMMAND);
-    }
-
     // will need to allocate space for each value in player array
     // can do that as soon as you get the number of players
-    printf("%d\n", *number_of_players);
-    set_players(players);
+    char **players = set_players();
 
     // Create Player Markers
     char *player1_marker = malloc(COMMAND);
     char *player2_marker = malloc(COMMAND);
     set_player_markers(player1_marker, player2_marker);
 
-    play_game(&player, board, *(players + 1), *(players + 2));
+    play_game(&player, board, *(players + 0), *(players + 1));
 
     printf("\n");
     print_board(board);
@@ -141,16 +122,30 @@ void set_player_markers(char *player1_marker, char *player2_marker)
     }
 }
 
-void set_players(char **players)
+char **set_players()
 {
-    for (int counter = 0; counter < sizeof(players); counter++)
-    {
+    // User Defined Number of Players
+    int *number_of_players = malloc(sizeof(int));
+    char *user_input = malloc(COMMAND);
+    printf("Please Enter the Number of Players:\n");
+    fgets(user_input, COMMAND - 1, stdin);
+    *number_of_players = atoi(user_input);
 
-        printf("size of players pointer array: %d\n", sizeof(players));
+    char **players = malloc(*number_of_players * sizeof(char *));
+
+    // Create player names
+    for (int counter = 0; counter < *number_of_players; counter++)
+    {
+        *(players + counter) = malloc(COMMAND);
         printf("Player %d enter your name:\n", counter + 1);
         fgets(*(players + counter), COMMAND - 1, stdin);
-        *(players + strcspn(*(players + counter), "\n")) = 0;
+        // *(players + strcspn(*(players + counter), "\n")) = 0;
+
+        // Remove the trailing newline character
+        (*(*(players + counter) + strcspn(*(players + counter), "\n"))) = '\0';
     }
+
+    return players;
 }
 
 void play_game(int *player, char **game, char *player1, char *player2)
