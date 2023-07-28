@@ -8,12 +8,12 @@
 
 // fread(&fh_data, sizeof(fh_data), 1, fh_read);
 // void set_player_names(char *player1, char *player2);
-char **set_players();
-void set_player_markers(char *player1_marker, char *player2_marker);
+char **set_players(int number_of_players);
+char *set_player_markers(int number_of_players);
 bool is_valid_marker(char *marker);
-void play_game(int *player, char **game, char *player1, char *player2);
+void play_game(int *player, char **game, char **players, char *player_markers);
 void collect_user_input(int *row, int *column, char **game);
-void write_value(int *player, char **game, int row, int column);
+void write_value(int *player, char **game, int row, int column, char *player_markers);
 bool is_valid_command(char *user_input);
 void parse_command(int *row, int *column, char *user_input);
 bool is_available(int row, int column, char **game);
@@ -38,16 +38,24 @@ int main(int argc, char *argv[])
 
     // gameplay loop
 
+    // User Defined Number of Players
+    int *number_of_players = malloc(sizeof(int));
+    char *user_input = malloc(COMMAND);
+    printf("Please Enter the Number of Players:\n");
+    fgets(user_input, COMMAND - 1, stdin);
+    *number_of_players = atoi(user_input);
+
     // will need to allocate space for each value in player array
     // can do that as soon as you get the number of players
-    char **players = set_players();
+    char **players = set_players(*number_of_players);
 
     // Create Player Markers
-    char *player1_marker = malloc(COMMAND);
-    char *player2_marker = malloc(COMMAND);
-    set_player_markers(player1_marker, player2_marker);
+    char *player_markers = set_player_markers(*number_of_players);
+    // char *player1_marker = malloc(COMMAND);
+    // char *player2_marker = malloc(COMMAND);
+    // set_player_markers(player1_marker, player2_marker);
 
-    play_game(&player, board, *(players + 0), *(players + 1));
+    play_game(&player, board, players, player_markers);
 
     printf("\n");
     print_board(board);
@@ -60,15 +68,27 @@ int main(int argc, char *argv[])
 bool is_valid_marker(char *marker)
 {
 
-    if (*marker == '\0')
+    if (*(marker + 1) == '\0')
     {
         printf("Marker must contain a value\n");
         return false;
     }
 
-    if (strlen(marker) > 1)
+    if (strlen(marker) - 1 > 1)
     {
         printf("Marker is too long. It can only be one digit.\n");
+        return false;
+    }
+
+    if (*marker == '-')
+    {
+        printf("\"-\" is a reserved character and cannot be used for your marker\n");
+        return false;
+    }
+
+    if (islower(*marker))
+    {
+        printf("Marker must be uppercase\n");
         return false;
     }
 
@@ -78,63 +98,36 @@ bool is_valid_marker(char *marker)
         return false;
     }
 
-    if (islower(*marker))
-    {
-        printf("Marker must be uppercase\n");
-        return false;
-    }
+    return true;
 }
 
-void set_player_markers(char *player1_marker, char *player2_marker)
+char *set_player_markers(int number_of_players)
 {
-    bool is_valid = false;
 
-    while (!is_valid)
+    char *markers = malloc(number_of_players);
+    int counter = 0;
+    // Create player names
+    while (counter < number_of_players)
     {
-        printf("Player 1 enter your marker:\n");
-        fgets(player1_marker, COMMAND - 1, stdin);
-        player1_marker[strcspn(player1_marker, "\n")] = 0;
-        if (!is_valid_marker(player1_marker))
+        printf("Player %d enter your marker:\n", counter + 1);
+        fgets(markers + counter, COMMAND - 1, stdin);
+
+        if (is_valid_marker((markers + counter)))
         {
-            is_valid = false;
-        }
-        else
-        {
-            is_valid = true;
+            counter++;
         }
     }
 
-    is_valid = false;
-
-    while (!is_valid)
-    {
-        printf("Player 2 enter your marker:\n");
-        fgets(player2_marker, COMMAND - 1, stdin);
-        player2_marker[strcspn(player2_marker, "\n")] = 0;
-        if (!is_valid_marker(player2_marker))
-        {
-            is_valid = false;
-        }
-        else
-        {
-            is_valid = true;
-        }
-    }
+    return markers;
 }
 
-char **set_players()
+char **set_players(int number_of_players)
 {
-    // User Defined Number of Players
-    int *number_of_players = malloc(sizeof(int));
-    char *user_input = malloc(COMMAND);
-    printf("Please Enter the Number of Players:\n");
-    fgets(user_input, COMMAND - 1, stdin);
-    *number_of_players = atoi(user_input);
 
-    char **players = malloc(*number_of_players * sizeof(char *));
+    char **players = malloc(number_of_players * sizeof(char *));
 
     // Create player names
-    for (int counter = 0; counter < *number_of_players; counter++)
+    for (int counter = 0; counter < number_of_players; counter++)
     {
         *(players + counter) = malloc(COMMAND);
         printf("Player %d enter your name:\n", counter + 1);
@@ -148,21 +141,23 @@ char **set_players()
     return players;
 }
 
-void play_game(int *player, char **game, char *player1, char *player2)
+void play_game(int *player, char **game, char **players, char *player_markers)
 {
     int row;
     int column;
 
     print_board(game);
-    printf("%s it's your turn! Enter a command:\n", *player == 1 ? player1 : player2);
+
+    printf("%s it's your turn! Enter a command:\n", *player == 1 ? *players : *(players + 1));
 
     collect_user_input(&row, &column, game);
 
-    write_value(player, game, row, column);
+    // write_value(player, game, row, column, player_markers);
+    *(*(game + row) + column) = *(player_markers + (*player - 1));
 
     if (is_won(game))
     {
-        printf("%s you won! Better luck next time %s", *player == 1 ? player1 : player2, *player == 1 ? player2 : player1);
+        printf("%s you won! Better luck next time %s", *player == 1 ? *players : *(players + 1), *player == 1 ? *(players + 1) : *players);
     }
     else if (is_full(game))
     {
@@ -171,7 +166,7 @@ void play_game(int *player, char **game, char *player1, char *player2)
     else
     {
         *player = 1 + (*player % 2);
-        play_game(player, game, player1, player2);
+        play_game(player, game, players, player_markers);
     }
 }
 
@@ -198,17 +193,11 @@ void collect_user_input(int *row, int *column, char **game)
     }
 }
 
-void write_value(int *player, char **game, int row, int column)
+void write_value(int *player, char **game, int row, int column, char *player_markers)
 {
     // writes value to board based on player number
-    if (*player == 1)
-    {
-        *(*(game + row) + column) = 'X';
-    }
-    else if (*player == 2)
-    {
-        *(*(game + row) + column) = 'O';
-    }
+
+    *(*(game + row) + column) = *(player_markers + (*player - 1));
 }
 
 bool is_valid_command(char *user_input)
