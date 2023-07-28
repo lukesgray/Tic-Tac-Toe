@@ -11,7 +11,7 @@
 char **set_players(int number_of_players);
 char *set_player_markers(int number_of_players);
 bool is_valid_marker(char *marker);
-void play_game(int *player, char **game, char **players, char *player_markers);
+void play_game(int *player, char **game, char **players, char *player_markers, int number_of_players);
 void collect_user_input(int *row, int *column, char **game);
 void write_value(int *player, char **game, int row, int column, char *player_markers);
 bool is_valid_command(char *user_input);
@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     // char *player2_marker = malloc(COMMAND);
     // set_player_markers(player1_marker, player2_marker);
 
-    play_game(&player, board, players, player_markers);
+    play_game(&player, board, players, player_markers, *number_of_players);
 
     printf("\n");
     print_board(board);
@@ -141,14 +141,14 @@ char **set_players(int number_of_players)
     return players;
 }
 
-void play_game(int *player, char **game, char **players, char *player_markers)
+void play_game(int *player, char **game, char **players, char *player_markers, int number_of_players)
 {
     int row;
     int column;
 
     print_board(game);
 
-    printf("%s it's your turn! Enter a command:\n", *player == 1 ? *players : *(players + 1));
+    printf("%s it's your turn! Enter a command:\n", *(players + (*player - 1)));
 
     collect_user_input(&row, &column, game);
 
@@ -157,7 +157,11 @@ void play_game(int *player, char **game, char **players, char *player_markers)
 
     if (is_won(game))
     {
-        printf("%s you won! Better luck next time %s", *player == 1 ? *players : *(players + 1), *player == 1 ? *(players + 1) : *players);
+        printf("%s you won!", *(players + (*player - 1)));
+        // for (int i = 0; i < number_of_players - 1; i++)
+        // {
+        //     printf("%s, and\n", *(players + (*player)));
+        // }
     }
     else if (is_full(game))
     {
@@ -165,8 +169,8 @@ void play_game(int *player, char **game, char **players, char *player_markers)
     }
     else
     {
-        *player = 1 + (*player % 2);
-        play_game(player, game, players, player_markers);
+        *player = 1 + (*player % number_of_players);
+        play_game(player, game, players, player_markers, number_of_players);
     }
 }
 
