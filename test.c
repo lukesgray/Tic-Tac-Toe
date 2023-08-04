@@ -8,6 +8,7 @@
 
 // fread(&fh_data, sizeof(fh_data), 1, fh_read);
 // void set_player_names(char *player1, char *player2);
+
 char **set_players(int number_of_players);
 char *set_player_markers(int number_of_players);
 bool is_valid_marker(char *marker);
@@ -20,6 +21,9 @@ bool is_available(int row, int column, char **game);
 bool is_full(char **board);
 bool is_won(char **board);
 char **create_board();
+
+bool is_whole_number(char *number_of_players);
+int set_number_of_players();
 
 // Instruction Functions
 void print_board(char **board);
@@ -39,23 +43,16 @@ int main(int argc, char *argv[])
     // gameplay loop
 
     // User Defined Number of Players
-    int *number_of_players = malloc(sizeof(int));
-    char *user_input = malloc(COMMAND);
-    printf("Please Enter the Number of Players:\n");
-    fgets(user_input, COMMAND - 1, stdin);
-    *number_of_players = atoi(user_input);
+    int number_of_players = set_number_of_players();
 
     // will need to allocate space for each value in player array
     // can do that as soon as you get the number of players
-    char **players = set_players(*number_of_players);
+    char **players = set_players(number_of_players);
 
     // Create Player Markers
-    char *player_markers = set_player_markers(*number_of_players);
-    // char *player1_marker = malloc(COMMAND);
-    // char *player2_marker = malloc(COMMAND);
-    // set_player_markers(player1_marker, player2_marker);
+    char *player_markers = set_player_markers(number_of_players);
 
-    play_game(&player, board, players, player_markers, *number_of_players);
+    play_game(&player, board, players, player_markers, number_of_players);
 
     printf("\n");
     print_board(board);
@@ -158,10 +155,6 @@ void play_game(int *player, char **game, char **players, char *player_markers, i
     if (is_won(game))
     {
         printf("%s you won!", *(players + (*player - 1)));
-        // for (int i = 0; i < number_of_players - 1; i++)
-        // {
-        //     printf("%s, and\n", *(players + (*player)));
-        // }
     }
     else if (is_full(game))
     {
@@ -200,7 +193,6 @@ void collect_user_input(int *row, int *column, char **game)
 void write_value(int *player, char **game, int row, int column, char *player_markers)
 {
     // writes value to board based on player number
-
     *(*(game + row) + column) = *(player_markers + (*player - 1));
 }
 
@@ -345,11 +337,11 @@ bool is_won(char **board)
 
     for (int column_counter = 0; column_counter < 3; column_counter++)
     {
-        char e1 = *(*board + column_counter);
-        char e2 = *(*(board + 1) + column_counter);
-        char e3 = *(*(board + 2) + column_counter);
+        char element1 = *(*board + column_counter);
+        char element2 = *(*(board + 1) + column_counter);
+        char element3 = *(*(board + 2) + column_counter);
 
-        if (e1 == e2 && e1 == e3 && e1 != '-')
+        if (element1 == element2 && element1 == element3 && element1 != '-')
         {
             printf("Column %d has three in a row\n", column_counter + 1);
             is_won = true;
@@ -371,6 +363,46 @@ bool is_won(char **board)
     }
 
     return is_won;
+}
+
+bool is_whole_number(char *number_of_players)
+{
+    if (strlen(number_of_players) > 2)
+    {
+        printf("Input must be a single character number\n");
+        return false;
+    }
+
+    if (!isdigit(*number_of_players))
+    {
+        printf("Must be a number\n");
+        return false;
+    }
+
+    return true;
+}
+
+int set_number_of_players()
+{
+    int number_of_players;
+    bool is_valid = false;
+    while (!is_valid)
+    {
+        printf("Please Enter the Number of Players:\n");
+
+        char *user_input = malloc(COMMAND);
+        fgets(user_input, COMMAND, stdin);
+
+        if (!is_whole_number(user_input))
+        {
+            free(user_input);
+            continue;
+        }
+        number_of_players = atoi(user_input);
+        is_valid = true;
+    }
+
+    return number_of_players;
 }
 
 void commands()

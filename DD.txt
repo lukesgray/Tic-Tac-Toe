@@ -27,3 +27,40 @@ game winner cases:
     -Row win: row is all the same
     -Column win: column is all the same
     -Diagonal win: 
+
+
+
+Features to add:
+    -Restrictions:
+        1. Distinct markers for each player
+        2. Number of players input must be a whole number
+        3. Number of players restricted to two for tic-tac-toe
+        4. Name of player cannot be blank
+    -Control Flow
+        1. Players input their name and marker at the same time
+        2. Players can change their name or marker on their turn
+    -Other
+        1. Checks for game being impossible to win
+
+Code to Refactor:
+    -Loop function that houses which ever functions you want to use in body
+        (requires counter < "number of players" variable)
+    -Number of Players into a function
+    -Each space for a marker is a struct with pointers to adjacent spaces (needed for using for Catan)
+    -Clean code up based on coding convention videos
+
+Schedule:
+    -Loop Functions
+        -Number of players restricted to two for ttt
+        -Players input marker and name at the same time
+        -Distinct markers for each player
+        -Name of player cannot be blank
+    -Clean code up based on coding convention videos
+        -Player can change their name or marker on their turn
+    -Each space is struct
+        -Checks for game being impossible to win
+    
+
+
+Catan:
+    1. Player can request an undo for the player before them
